@@ -22,7 +22,10 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-
+        # if capacity >= 8:
+        self.capacity = capacity
+        self.storage = [None] * capacity
+        self.keys = []
 
     def get_num_slots(self):
         """
@@ -35,7 +38,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return self.capacity
 
     def get_load_factor(self):
         """
@@ -44,7 +47,11 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        NumStored = 0
+        for i in self.storage:
+            if i :
+                NumStored += 1
+        return NumStored/self.get_num_slots()
 
     def fnv1(self, key):
         """
@@ -63,6 +70,10 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        hash = 5381
+        for x in key:
+            hash = (( hash << 5) + hash) + ord(x)
+        return hash & 0xFFFFFFFF
 
 
     def hash_index(self, key):
@@ -82,6 +93,9 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.keys.append(key)
+        index = self.hash_index(key)
+        self.storage[index] = value
 
 
     def delete(self, key):
@@ -93,6 +107,12 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        if self.storage[index]is not None:
+            self.keys.remove(key)
+            self.storage[index] = None
+        else:
+            return f"key {key} not found"
 
 
     def get(self, key):
@@ -104,6 +124,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        return self.storage[index]
 
 
     def resize(self, new_capacity):
@@ -114,7 +136,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        old_capacity = self.capacity
+        new_storage = [None] * new_capacity
+        for i in self.keys:
+            self.capacity = old_capacity
+            value = self.get(i)
+            self.capacity = new_capacity
+            index = self.hash_index(i)
+            new_storage[index] = value
+        self.storage = new_storage.copy()
 
 
 if __name__ == "__main__":
