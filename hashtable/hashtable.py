@@ -7,7 +7,6 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -25,7 +24,7 @@ class HashTable:
         # if capacity >= 8:
         self.capacity = capacity
         self.storage = [None] * capacity
-        self.keys = []
+        self.stored = 0
 
     def get_num_slots(self):
         """
@@ -47,11 +46,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        NumStored = 0
-        for i in self.storage:
-            if i :
-                NumStored += 1
-        return NumStored/self.get_num_slots()
+        return self.stored/self.get_num_slots()
 
     def fnv1(self, key):
         """
@@ -93,10 +88,26 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.keys.append(key)
         index = self.hash_index(key)
-        self.storage[index] = value
+        cur = self.storage[index]
 
+        # if no linked list exists at the index of storage
+        if cur is None:
+            self.storage[index] = HashTableEntry(key, value)
+            self.stored += 1
+        # linked list exists at the index of storage
+        else:
+            while cur is not None:
+                # found hash table entry with same key
+                if cur.key == key:
+                    cur.value = value
+                    break
+                elif cur.next is not None:
+                    cur = cur.next
+                # key doesn't exist, need to create new entry
+                else:
+                    cur.next = HashTableEntry(key, value)
+                    self.stored += 1
 
     def delete(self, key):
         """
@@ -108,12 +119,29 @@ class HashTable:
         """
         # Your code here
         index = self.hash_index(key)
-        if self.storage[index]is not None:
-            self.keys.remove(key)
-            self.storage[index] = None
+        find = self.get(key)
+        # no match key is found
+        if find is None:
+            return f"key {key} no found"
         else:
-            return f"key {key} not found"
-
+            cur = self.storage[index]
+            # match key is at the head of linked list
+            if cur.key == key:
+                self.storage[index] = cur.next
+                self.stored -= 1
+                return cur
+            # key is not at the head of linked list
+            prev = cur
+            cur = cur.next
+            while cur is not None:
+                if cur.key == key:
+                    prev.next = cur.next
+                    self.stored -=1
+                    return cur
+                else:
+                    prev = cur
+                    cur = cur.next
+            return f"key {key} no found"
 
     def get(self, key):
         """
@@ -125,7 +153,14 @@ class HashTable:
         """
         # Your code here
         index = self.hash_index(key)
-        return self.storage[index]
+        cur = self.storage[index]
+
+        while cur is not None:
+            if cur.key == key:
+                return cur.value
+            cur = cur.next
+    
+        return None
 
 
     def resize(self, new_capacity):
@@ -136,16 +171,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        old_capacity = self.capacity
-        new_storage = [None] * new_capacity
-        for i in self.keys:
-            self.capacity = old_capacity
-            value = self.get(i)
-            self.capacity = new_capacity
-            index = self.hash_index(i)
-            new_storage[index] = value
-        self.storage = new_storage.copy()
-
+        self.capacity = new_capacity
+        old_storage = self.storage
+        # setup new storage
+        self.storage = [None] * new_capacity
+        # for each entry in the old hash table, put into new storage
+        for entry in old_storage:
+            while entry is not None:
+                self.put(entry.key, entry.value)
+                entry = entry.next
 
 if __name__ == "__main__":
     ht = HashTable(8)
