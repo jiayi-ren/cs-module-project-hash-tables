@@ -108,6 +108,9 @@ class HashTable:
                 else:
                     cur.next = HashTableEntry(key, value)
                     self.stored += 1
+        # automatically rehash
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity * 2)
 
     def delete(self, key):
         """
@@ -129,6 +132,9 @@ class HashTable:
             if cur.key == key:
                 self.storage[index] = cur.next
                 self.stored -= 1
+                # automatically rehash
+                if self.get_load_factor() < 0.2 and self.capacity > 8:
+                    self.resize(self.capacity / 2)
                 return cur
             # key is not at the head of linked list
             prev = cur
@@ -137,6 +143,9 @@ class HashTable:
                 if cur.key == key:
                     prev.next = cur.next
                     self.stored -=1
+                    # automatically rehash
+                    if self.get_load_factor() < 0.2 and self.capacity > 8:
+                        self.resize(self.capacity / 2)
                     return cur
                 else:
                     prev = cur
