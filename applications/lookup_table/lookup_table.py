@@ -3,7 +3,7 @@ import random
 # import time
 import math
 
-look_up_table = {}
+lookup_table = {}
 
 def slowfun_too_slow(x, y):
     v = math.pow(x, y)
@@ -21,11 +21,11 @@ def slowfun(x, y):
     # Your code here
 
     v = math.pow(x, y)
-    if v not in look_up_table:
-        look_up_table[v] = math.factorial(v)
-        look_up_table[v] //= (x + y)
-        look_up_table[v] %= 982451653
-    v = look_up_table[v]
+    if v not in lookup_table:
+        lookup_table[v] = math.factorial(v)
+        lookup_table[v] //= (x + y)
+        lookup_table[v] %= 982451653
+    v = lookup_table[v]
 
     return v
 
