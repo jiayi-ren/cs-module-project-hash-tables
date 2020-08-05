@@ -7,7 +7,6 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -22,7 +21,10 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-
+        # if capacity >= 8:
+        self.capacity = capacity
+        self.storage = [None] * capacity
+        self.stored = 0
 
     def get_num_slots(self):
         """
@@ -35,7 +37,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return self.capacity
 
     def get_load_factor(self):
         """
@@ -44,7 +46,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return self.stored/self.get_num_slots()
 
     def fnv1(self, key):
         """
@@ -63,6 +65,10 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        hash = 5381
+        for x in key:
+            hash = (( hash << 5) + hash) + ord(x)
+        return hash & 0xFFFFFFFF
 
 
     def hash_index(self, key):
@@ -82,7 +88,29 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        cur = self.storage[index]
 
+        # if no linked list exists at the index of storage
+        if cur is None:
+            self.storage[index] = HashTableEntry(key, value)
+            self.stored += 1
+        # linked list exists at the index of storage
+        else:
+            while cur is not None:
+                # found hash table entry with same key
+                if cur.key == key:
+                    cur.value = value
+                    break
+                elif cur.next is not None:
+                    cur = cur.next
+                # key doesn't exist, need to create new entry
+                else:
+                    cur.next = HashTableEntry(key, value)
+                    self.stored += 1
+        # automatically rehash
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity * 2)
 
     def delete(self, key):
         """
@@ -93,7 +121,36 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        index = self.hash_index(key)
+        find = self.get(key)
+        # no match key is found
+        if find is None:
+            return f"key {key} no found"
+        else:
+            cur = self.storage[index]
+            # match key is at the head of linked list
+            if cur.key == key:
+                self.storage[index] = cur.next
+                self.stored -= 1
+                # automatically rehash
+                if self.get_load_factor() < 0.2 and self.capacity > 8:
+                    self.resize(self.capacity / 2)
+                return cur
+            # key is not at the head of linked list
+            prev = cur
+            cur = cur.next
+            while cur is not None:
+                if cur.key == key:
+                    prev.next = cur.next
+                    self.stored -=1
+                    # automatically rehash
+                    if self.get_load_factor() < 0.2 and self.capacity > 8:
+                        self.resize(self.capacity / 2)
+                    return cur
+                else:
+                    prev = cur
+                    cur = cur.next
+            return f"key {key} no found"
 
     def get(self, key):
         """
@@ -104,6 +161,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        cur = self.storage[index]
+
+        while cur is not None:
+            if cur.key == key:
+                return cur.value
+            cur = cur.next
+    
+        return None
 
 
     def resize(self, new_capacity):
@@ -114,8 +180,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
-
+        self.capacity = new_capacity
+        old_storage = self.storage
+        # setup new storage
+        self.storage = [None] * new_capacity
+        # for each entry in the old hash table, put into new storage
+        for entry in old_storage:
+            while entry is not None:
+                self.put(entry.key, entry.value)
+                entry = entry.next
 
 if __name__ == "__main__":
     ht = HashTable(8)
