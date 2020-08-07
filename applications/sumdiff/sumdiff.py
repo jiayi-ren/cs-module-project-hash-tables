@@ -33,7 +33,7 @@ def sumdiff(number_set):
     # subtraction dict {f(c)-f(d) : c_d}
     sub_comb = {}
     for i in range(len(num_set)-1, -1, -1):
-        for j in range(len(num_set)-1, -1, -1):
+        for j in range(i, -1, -1):
             sub_value = fx_lookup[num_set[i]] - fx_lookup[num_set[j]]
             if sub_value not in sub_comb:
                 sub_comb[sub_value] = [f"{num_set[i]}_{num_set[j]}"]
