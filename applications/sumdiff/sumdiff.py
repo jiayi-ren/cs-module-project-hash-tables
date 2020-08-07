@@ -4,9 +4,8 @@ f(a) + f(b) = f(c) - f(d)
 """
 
 # q = set(range(1, 10))
-# q = set(range(1, 200))
+# q = set(range(1, 100))
 q = (1, 3, 4, 7, 12)
-
 
 def f(x):
     return x * 4 + 6
@@ -21,56 +20,47 @@ def sumdiff(number_set):
     for x in num_set:
         fx_lookup[x] = f(x)
 
-    # addition dict { a_b : f(a)+f(b)}
+    # addition dict { f(a)+f(b) : a_b}
     add_comb = {}
     i = 0
     while i < len(num_set):
         j = 0
         while j < len(num_set)-1:
-            if f"{num_set[i]}_{num_set[j]}" not in add_comb:
-                add_comb[f"{num_set[i]}_{num_set[j]}"] = fx_lookup[num_set[i]] + fx_lookup[num_set[j]]
+            add_value = fx_lookup[num_set[i]] + fx_lookup[num_set[j]]
+            if  add_value not in add_comb:
+                add_comb[add_value] = [f"{num_set[i]}_{num_set[j]}"]
+            else:
+                add_comb[add_value].append(f"{num_set[i]}_{num_set[j]}")
             j += 1
         i += 1
     
-    # subtraction dict { c_d : f(c)-f(d) }
+    # subtraction dict {f(c)-f(d) : c_d}
     sub_comb = {}
     i = len(num_set)-1
     while i >= 0:
         j = len(num_set)-1
         while j >= 0:
-            if f"{num_set[i]}_{num_set[j]}" not in sub_comb:
-                sub_comb[f"{num_set[i]}_{num_set[j]}"] = fx_lookup[num_set[i]] - fx_lookup[num_set[j]]
+            sub_value = fx_lookup[num_set[i]] - fx_lookup[num_set[j]]
+            if sub_value not in sub_comb:
+                sub_comb[sub_value] = [f"{num_set[i]}_{num_set[j]}"]
+            else:
+                sub_comb[sub_value].append(f"{num_set[i]}_{num_set[j]}")
             j -= 1
         i -= 1
-    
-    # addition dict { f(a)+f(b) : a_b}
-    rev_add_comb = {}
-    for key, value in add_comb.items():
-        if value not in rev_add_comb:
-            rev_add_comb[value] = [key]
-        else:
-            rev_add_comb[value].append(key)
-
-    # subtraction dict {f(c)-f(d) : c_d}
-    rev_sub_comb = {}
-    for key, value in sub_comb.items():
-        if value not in rev_sub_comb:
-            rev_sub_comb[value] = [key]
-        else:
-            rev_sub_comb[value].append(key)
     
     # loop through addition dict
     #  if exits in subtraction dict
     #    add to result
     res = []
-    for value, comb in rev_add_comb.items():
-        if value in rev_sub_comb:
+    for value, comb in add_comb.items():
+        if value in sub_comb:
             for i in comb:
-                for j in rev_sub_comb[value]:
+                for j in sub_comb[value]:
+                    # pass
                     res.append([i,j])
-
+                    
     # number of all possible combinations
-    # print(len(res))
+    print(len(res))
 
     # print all possible combinations
     for ele in res:
@@ -83,5 +73,5 @@ def sumdiff(number_set):
         formula = f"f({a}) + f({b}) = f({c}) - f({d})"
         results = f"{fx_lookup[a]} + {fx_lookup[b]} = {fx_lookup[c]} - {fx_lookup[d]}"
         print(f"{formula}{results:>30}")
-
+        
 sumdiff(q)
