@@ -1,6 +1,16 @@
 def word_count(s):
     # Your code here
+    characters_to_ignore = '" : ; , . - + = / \ | [ ] { } ( ) * ^ &'.split(" ")
+    for character in characters_to_ignore:
+        s = s.replace(character, "")
 
+    words = {}
+    for word in s.lower().split():
+        if word not in words:
+            words[word] = 0
+        words[word] += 1
+
+    return words
 
 
 if __name__ == "__main__":
